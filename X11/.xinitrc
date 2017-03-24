@@ -1,56 +1,37 @@
-#define S_base03        #002b36
-#define S_base02        #073642
-#define S_base01        #586e75
-#define S_base00        #657b83
-#define S_base0         #839496
-#define S_base1         #93a1a1
-#define S_base2         #eee8d5
-#define S_base3         #fdf6e3
+#!/bin/sh
 
-*background:            S_base03
-*foreground:            S_base0
-*fadeColor:             S_base03
-*cursorColor:           S_base1
-*pointerColorBackground:S_base01
-*pointerColorForeground:S_base1
+userresources=$HOME/.Xresources
+usermodmap=$HOME/.Xmodmap
+sysresources=/etc/X11/xinit/.Xresources
+sysmodmap=/etc/X11/xinit/.Xmodmap
 
-#define S_yellow        #b58900
-#define S_orange        #cb4b16
-#define S_red           #dc322f
-#define S_magenta       #d33682
-#define S_violet        #6c71c4
-#define S_blue          #268bd2
-#define S_cyan          #2aa198
-#define S_green         #859900
+# merge in defaults and keymaps
+if [ -f $sysresources ]; then
+    xrdb -merge $sysresources
+fi
 
-!! black dark/light
-*color0:                S_base02
-*color8:                S_base03
+if [ -f $sysmodmap ]; then
+    xmodmap $sysmodmap
+fi
 
-!! red dark/light
-*color1:                S_red
-*color9:                S_orange
+if [ -f "$userresources" ]; then
+    xrdb -merge "$userresources"
+fi
 
-!! green dark/light
-*color2:                S_green
-*color10:               S_base01
+if [ -f "$usermodmap" ]; then
+    xmodmap "$usermodmap"
+fi
 
-!! yellow dark/light
-*color3:                S_yellow
-*color11:               S_base00
+# start some nice programs
+if [ -d /etc/X11/xinit/xinitrc.d ] ; then
+ for f in /etc/X11/xinit/xinitrc.d/?*.sh ; do
+  [ -x "$f" ] && . "$f"
+ done
+ unset f
+fi
 
-!! blue dark/light
-*color4:                S_blue
-*color12:               S_base0
-
-!! magenta dark/light
-*color5:                S_magenta
-*color13:               S_violet
-
-!! cyan dark/light
-*color6:                S_cyan
-*color14:               S_base1
-
-!! white dark/light
-*color7:                S_base2
-*color15: S_base3
+nvidia-settings --load-config-only &
+nitrogen --restore &
+twmnd &
+[[ -f ~/.Xresources ]] && xrdb -merge ~/.Xresources &
+exec i3
